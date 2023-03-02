@@ -31,9 +31,9 @@ new Vue({
             })
         },
         setHour(datetime){
-            console.log(datetime)
+            // console.log(datetime)
             // console.log(new Date(datetime).getHours())
-            console.log(new Date(datetime).toString())
+            // console.log(new Date(datetime).toString())
             return new Date(datetime).getHours()
         }, 
         roundTemp(tmp){
