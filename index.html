@@ -2,133 +2,96 @@
 <html>
 
 <head>
-  <link rel="manifest" href="meteo.webmanifest">
-
   <link href="https://fonts.googleapis.com/css?family=Roboto:100,300,400,500,700,900|Material+Icons" rel="stylesheet">
   <!-- Font Awesome -->
   <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet" />
   <!-- Google Fonts -->
   <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
   <!-- MDB -->
+  <link rel="apple-touch-icon" href="appimage/android/android-launchericon-512-512.png">
   <link href="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.2.0/mdb.min.css" rel="stylesheet" />
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
   <link rel="manifest" href="meteo.webmanifest">
+  <link rel="apple-touch-icon" href="appimage/android/android-launchericon-512-512.png">
+
 </head>
 
 <body>
-  <section class="vh-auto" id="app">
+  <section class="vh-100" id="app">
     <div class="container py-5">
 
       <div class="row d-flex justify-content-center align-items-center h-100">
         <div class="col-md-9 col-lg-7 col-xl-5">
 
           <div id="wrapper-bg" class="card text-white bg-image shadow-4-strong"
-            style="background-image: url('img/clouds.gif')">
+            style="background-image: url('https://mdbgo.io/ascensus/mdb-advanced/img/clear.gif')">
+
             <!-- Main current data -->
             <div class="card-header p-4 border-0">
-              <div class="text-center mb-3">
-                <p class="h2 mb-1">Ville : {{name}}</p>
-                <p class="mb-1"> {{description}}</p>
-                <p class="display-1 mb-1">{{roundTemp(temp)}}</p>
-                <span class="">Pressure: <span>{{pressure}}</span></span>
-                <span class="mx-2">|</span>
-                <span class="">Humidity: <span>{{humidity}}</span></span>
+
+              <div class="bg-gray-50 min-w-screen min-h-screen flex justify-center items-center">
+                <div class="max-w-xs relative space-y-3">
+                  <label for="search" class="text-gray-900">
+                    Type the name of a City to search
+                  </label>
+
+                  <input type="text" id="search" v-model="searchTerm" placeholder="Type here..."
+                    class="p-3 mb-0.5 w-full border border-gray-300 rounded">
+
+                  <ul v-if="searchCities.length"
+                    class="w-full rounded border border-gray-300 px-4 py-2 space-y-1 absolute z-10">
+                    
+                    <li v-for="(city, index) in searchCities" :key="index" @click="selectCity(city)"
+                      class="cursor-pointer hover:bg-gray-100 p-1">
+                      {{ city.name }} {{ city.zip_code }}
+                    </li>
+                  </ul>
+
+                  <p v-if="selectedCity" class="text-lg pt-2 absolute">
+                    You have selected: <span class="font-semibold">{{ selectedCity }}</span>
+                  </p>
+                </div>
+              </div>
+
+
+              <div class="mb-3">
+                <div class="d-flex">
+                  <h6 class="flex-grow-1 mb-1 h2">{{name}}</h6>
+                  <h6 class="mb-1 h2">{{getHour(hour)}}</h6>
+                </div>
+                <div class="text-center mb-3">
+                  <p class="display-1 mb-1">{{roundTemp(temp)}} <span>&#176;</span>C</p>
+                  <p class="mb-1"> {{description}}</p>
+                  <span class="">Pressure: <span>{{pressure}}</span></span>
+                  <span class="mx-2">|</span>
+                  <span class="">Humidity: <span>{{humidity}}</span></span>
+                </div>
               </div>
             </div>
-            
+
             <!-- Hourly forecast -->
-            <div class="card-body p-4 border-top border-bottom mb-2 horizontal-scrollable">
-              <div class="row text-center flex-row flex-nowrap">
-                <div class="col-2" v-for="h in hourly">
-                  <strong class="d-block mb-2">{{setHour(h.dt)}}</strong>
-                  <img src="" class="" alt="" />
-                  <strong class="d-block">{{roundTemp(h.temp)}}°</strong>
-                </div>
+            <div class="d-flex overflow-auto text-center m-2 pb-3 pt-2 border-top border-bottom mb-2"
+              style="max-width: 100%;">
+              <div class="flex-column p-2" v-for="h in hourly">
+                <p class="mb-0"><strong>{{setHour(h.dt)}}</strong></p>
+                <p class="small"><strong>{{roundTemp(h.temp)}} <span>&#176;</span></strong></p>
+                <img v-bind:src="iconBaseUrl +h.weather[0].icon+'.png'">
+                <p class="mb-0 text-muted" style="font-size: .65rem;">PM</p>
               </div>
             </div>
-
-            <div class="card-body p-4 border-top border-bottom mb-2">
-              <div class="row text-center">
-                <div class="col-2">
-                  <strong class="d-block mb-2">Now</strong>
-                  <img id="wrapper-icon-hour-now" src="" class="" alt="" />
-                  <strong class="d-block" id="wrapper-hour-now"></strong>
-                </div>
-
-                <div class="col-2">
-                  <strong class="d-block mb-2" id="wrapper-time1"></strong>
-                  <img id="wrapper-icon-hour1" src="" class="" alt="" />
-                  <strong class="d-block" id="wrapper-hour1"></strong>
-                </div>
-
-                <div class="col-2">
-                  <strong class="d-block mb-2" id="wrapper-time2"></strong>
-                  <img id="wrapper-icon-hour2" src="" class="" alt="" />
-                  <strong class="d-block" id="wrapper-hour2"></strong>
-                </div>
-
-                <div class="col-2">
-                  <strong class="d-block mb-2" id="wrapper-time3"></strong>
-                  <img id="wrapper-icon-hour3" src="" class="" alt="" />
-                  <strong class="d-block" id="wrapper-hour3"></strong>
-                </div>
-
-                <div class="col-2">
-                  <strong class="d-block mb-2" id="wrapper-time4"></strong>
-                  <img id="wrapper-icon-hour4" src="" class="" alt="" />
-                  <strong class="d-block" id="wrapper-hour4"></strong>
-                </div>
-
-                <div class="col-2">
-                  <strong class="d-block mb-2" id="wrapper-time5"></strong>
-                  <img id="wrapper-icon-hour5" src="" class="" alt="" />
-                  <strong class="d-block" id="wrapper-hour5"></strong>
-                </div>
-              </div>
-            </div>
-
             <!-- Daily forecast -->
-            <div class="card-body px-5">
-              <div class="row align-items-center">
-                <div class="col-lg-6">
-                  <strong>Today</strong>
-                </div>
-
-                <div class="col-lg-2 text-center">
-                  <img id="wrapper-icon-today" src="" class="w-100" alt="" />
-                </div>
-
-                <div class="col-lg-4 text-end">
-                  <span id="wrapper-forecast-temp-today"></span>
-                </div>
+            <div class="">
+              <div class="d-flex align-items-center p-4">
+                <div class="col"><strong>Day</strong></div>
+                <div class="col"><strong>Weather</strong></div>
+                <div class="col">Tem max</div>
+                <div class="col">Tem min</div>
               </div>
-
-              <div class="row align-items-center">
-                <div class="col-lg-6">
-                  <strong>Tomorrow</strong>
-                </div>
-
-                <div class="col-lg-2 text-center">
-                  <img id="wrapper-icon-tomorrow" src="" class="w-100" alt="" />
-                </div>
-
-                <div class="col-lg-4 text-end">
-                  <span id="wrapper-forecast-temp-tomorrow">28</span>
-                </div>
-              </div>
-
-              <div class="row align-items-center">
-                <div class="col-lg-6">
-                  <strong>Day after tomorrow</strong>
-                </div>
-
-                <div class="col-lg-2 text-center">
-                  <img id="wrapper-icon-dAT" src="" class="w-100" alt="" />
-                </div>
-
-                <div class="col-lg-4 text-end">
-                  <span id="wrapper-forecast-temp-dAT">28</span>
-                </div>
+              <div class="d-flex align-items-center p-2" v-for="d in daily">
+                <div class="col"><strong>{{getDay(d.dt)}}</strong></div>
+                <div class="col"><img v-bind:src="iconBaseUrl +d.weather[0].icon+'.png'"></div>
+                <div class="col"><strong>{{roundTemp(d.temp.max)}} <span>&#176;</span></strong></div>
+                <div class="col"><strong>{{roundTemp(d.temp.min)}} <span>&#176;</span></strong></div>
               </div>
             </div>
           </div>
@@ -141,7 +104,16 @@
   <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mdb-ui-kit/6.2.0/mdb.min.js"></script>
   <script src="app.js"></script>
-  <script src="meteo.js"></script>
+  <script>
+    if('serviceWorker' in navigator){
+      window.addEventListener('load', function(){
+        navigator.serviceWorker.register('serviceWorker.js').then(function(){
+          console.log('ServieWorker is loaded !')
+        })
+      })
+    }
+  </script>
+
 </body>
 
 </html>
